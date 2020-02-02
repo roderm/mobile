@@ -46,6 +46,10 @@ typedef struct ret_nbyteslice {
 	nbyteslice res;
 	jint exc;
 } ret_nbyteslice;
+typedef struct ret_nintslice {
+	nintslice res;
+	jint exc;
+} ret_nintslice;
 
 extern ret_nstring cproxy_java_lang_Float_toString(jint this);
 extern ret_nstring cproxy_java_lang_Long_toString(jint this);

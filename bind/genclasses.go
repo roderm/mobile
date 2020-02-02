@@ -52,7 +52,13 @@ func (g *ClassGen) isSupported(t *java.Type) bool {
 	switch t.Kind {
 	case java.Array:
 		// TODO: Support all array types
-		return t.Elem.Kind == java.Byte
+		switch t.Elem.Kind {
+		case java.Byte:
+			return true
+		case java.Int:
+			return true
+		}
+		return false
 	default:
 		return true
 	}
@@ -761,10 +767,16 @@ func (g *ClassGen) genRead(to, from string, t *java.Type, mode varMode) {
 	case java.String:
 		g.Printf("%s := decodeString(%s)\n", to, from)
 	case java.Array:
-		if t.Elem.Kind != java.Byte {
+		switch t.Elem.Kind {
+		case java.Byte:
+			g.Printf("%s := toSlice(%s, %v)\n", to, from, mode == modeRetained)
+		case java.Int:
+			g.Printf("%s := toIntSlice(%s, %v)\n", to, from, mode == modeRetained)
+		// case ???:
+		// TODO @roderm: array of objects/pointers
+		default:
 			panic("unsupported array type")
 		}
-		g.Printf("%s := toSlice(%s, %v)\n", to, from, mode == modeRetained)
 	case java.Object:
 		_, hasProxy := g.imported[t.Class]
 		g.genRefRead(to, from, g.goType(t, false), "proxy_class_"+flattenName(t.Class), hasProxy)
@@ -843,6 +855,8 @@ func (g *ClassGen) genJavaToC(v string, t *java.Type) {
 			g.Printf("nbyteslice _%s = go_seq_from_java_bytearray(env, %s, 1);\n", v, v)
 		case java.Int:
 			g.Printf("nintslice _%s = go_seq_from_java_intarray(env, %s, 1);\n", v, v)
+		// case ???:
+		// TODO @roderm: array of objects/pointers
 		default:
 			panic("unsupported array type")
 		}
@@ -860,10 +874,16 @@ func (g *ClassGen) genCToJava(v string, t *java.Type) {
 	case java.String:
 		g.Printf("jstring _%s = go_seq_to_java_string(env, %s);\n", v, v)
 	case java.Array:
-		if t.Elem.Kind != java.Byte {
+		switch t.Elem.Kind {
+		case java.Byte:
+			g.Printf("jbyteArray _%s = go_seq_to_java_bytearray(env, %s, 0);\n", v, v)
+		case java.Int:
+			g.Printf("jintArray _%s = go_seq_to_java_intarray(env, %s, 0);\n", v, v)
+		// case ???:
+		// TODO @roderm:
+		default:
 			panic("unsupported array type")
 		}
-		g.Printf("jbyteArray _%s = go_seq_to_java_bytearray(env, %s, 0);\n", v, v)
 	case java.Object:
 		g.Printf("jobject _%s = go_seq_from_refnum(env, %s, NULL, NULL);\n", v, v)
 	default:

@@ -33,15 +33,6 @@ Java_basictypes_Basictypes_byteArrays(JNIEnv* env, jclass _clazz, jbyteArray x) 
     return _r0;
 }
 
-JNIEXPORT jintArray JNICALL
-Java_basictypes_Basictypes_intArrays(JNIEnv* env, jclass _clazz, jintArray x) {
-    nintslice _x = go_seq_from_java_intarray(env, x, 0);
-    nintslice r0 = proxybasictypes__IntArrays(_x);
-    go_seq_release_int_array(env, x, _x.ptr);
-    jintArray _r0 = go_seq_to_java_intarray(env, r0, 1);
-    return _r0;
-}
-
 JNIEXPORT void JNICALL
 Java_basictypes_Basictypes_error(JNIEnv* env, jclass _clazz) {
     int32_t r0 = proxybasictypes__Error();

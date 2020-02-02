@@ -134,6 +134,8 @@ func (j *javaClassInfo) toJavaType(T types.Type) *java.Type {
 			switch e.Kind() {
 			case types.Uint8: // Byte.
 				return &java.Type{Kind: java.Array, Elem: &java.Type{Kind: java.Byte}}
+			case types.Int32:
+				return &java.Type{Kind: java.Array, Elem: &java.Type{Kind: java.Int}}
 			}
 		}
 		return nil
@@ -641,7 +643,17 @@ func (g *JavaGen) jniType(T types.Type) string {
 			return "TODO"
 		}
 	case *types.Slice:
-		return "jbyteArray"
+		switch e := T.Elem().(type) {
+		case *types.Basic:
+			switch e.Kind() {
+			case types.Uint8:
+				return "jbyteArray"
+			case types.Int32:
+				return "jintArray"
+				// case ???:
+				// TODO @roderm
+			}
+		}
 
 	case *types.Pointer:
 		if _, ok := T.Elem().(*types.Named); ok {
@@ -914,6 +926,8 @@ func (g *JavaGen) genJavaToC(varName string, t types.Type, mode varMode) {
 				g.Printf("nbyteslice _%s = go_seq_from_java_bytearray(env, %s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
 			case types.Int32:
 				g.Printf("nintslice _%s = go_seq_from_java_intarray(env, %s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
+			// case ???:
+			// TODO @roderm
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
@@ -951,8 +965,10 @@ func (g *JavaGen) genCToJava(toName, fromName string, t types.Type, mode varMode
 			switch e.Kind() {
 			case types.Uint8: // Byte.
 				g.Printf("jbyteArray %s = go_seq_to_java_bytearray(env, %s, %d);\n", toName, fromName, toCFlag(mode == modeRetained))
-			case types.Int32: // Byte.
+			case types.Int32: // Int32.
 				g.Printf("jintArray %s = go_seq_to_java_intarray(env, %s, %d);\n", toName, fromName, toCFlag(mode == modeRetained))
+			// case ???:
+			// TODO @roderm
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
@@ -1273,6 +1289,12 @@ func (g *JavaGen) genRelease(varName string, t types.Type, mode varMode) {
 				if mode == modeTransient {
 					g.Printf("go_seq_release_byte_array(env, %s, _%s.ptr);\n", varName, varName)
 				}
+			case types.Int:
+				if mode == modeTransient {
+					g.Printf("go_seq_release_int_array(env, %s, _%s.ptr);\n", varName, varName)
+				}
+			// case ???:
+			// TODO @roderm
 			}
 		}
 	}
@@ -1392,7 +1414,7 @@ func (g *JavaGen) jniCallType(t types.Type) string {
 		default:
 			g.errorf("unsupported basic type: %s", t)
 		}
-	case *types.Slice:
+	case *types.Slice: // @roderm Testing?
 		return "Object"
 	case *types.Pointer:
 		if _, ok := t.Elem().(*types.Named); ok {
@@ -1443,7 +1465,7 @@ func (g *JavaGen) jniSigType(T types.Type) string {
 			return "TODO"
 		}
 	case *types.Slice:
-		return "[" + g.jniSigType(T.Elem())
+		return "[" + g.jniSigType(T.Elem()) // TODO @roderm: testing
 	case *types.Pointer:
 		if _, ok := T.Elem().(*types.Named); ok {
 			return g.jniSigType(T.Elem())

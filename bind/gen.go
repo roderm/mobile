@@ -404,6 +404,11 @@ func (g *Generator) cgoType(t types.Type) string {
 			default:
 				g.errorf("unsupported slice type: %s", t)
 			}
+		case *types.Pointer:
+			if _, ok := t.Elem().(*types.Named); ok {
+				return "nslice_" + g.cgoType(t.Elem())
+			}
+			g.errorf("unsupported slice with pointer to type: %s", t)
 		default:
 			g.errorf("unsupported slice type: %s", t)
 		}

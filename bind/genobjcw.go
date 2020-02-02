@@ -440,6 +440,8 @@ func (g *ObjcWrapper) genCToObjC(name string, t *objc.Type, mode varMode) {
 		g.Printf("BOOL _%s = %s ? YES : NO;\n", name, name)
 	case objc.Data:
 		g.Printf("NSData *_%s = go_seq_to_objc_bytearray(%s, %d);\n", name, name, toCFlag(mode == modeRetained))
+	case objc.IntArray: // TODO @roderm
+		g.Printf("NSArray *_%s = go_seq_to_objc_intarray(%s, %d);\n", name, name, toCFlag(mode == modeRetained))
 	case objc.Int, objc.Uint, objc.Short, objc.Ushort, objc.Char, objc.Uchar, objc.Float, objc.Double:
 		g.Printf("%s _%s = (%s)%s;\n", g.objcType(t), name, g.objcType(t), name)
 	case objc.Class, objc.Protocol:
@@ -459,7 +461,7 @@ func (g *ObjcWrapper) genObjCToC(name string, t *objc.Type, mode varMode) {
 		g.Printf("nstring _%s = go_seq_from_objc_string(%s);\n", name, name)
 	case objc.Data:
 		g.Printf("nbyteslice _%s = go_seq_from_objc_bytearray(%s, %d);\n", name, name, toCFlag(mode == modeRetained))
-	case objc.IntArray:
+	case objc.IntArray: // TODO @roderm
 		g.Printf("nintslice _%s = go_seq_from_objc_intarray(%s, %d);\n", name, name, toCFlag(mode == modeRetained))
 	case objc.Bool, objc.Int, objc.Uint, objc.Short, objc.Ushort, objc.Char, objc.Uchar, objc.Float, objc.Double:
 		g.Printf("%s _%s = (%s)%s;\n", g.cType(t), name, g.cType(t), name)
@@ -476,6 +478,8 @@ func (g *ObjcWrapper) genWrite(a *objc.Param) {
 		g.Printf("_%s := encodeString(%s)\n", a.Name, a.Name)
 	case objc.Data:
 		g.Printf("_%s := fromSlice(%s, false)\n", a.Name, a.Name)
+	case objc.IntArray: // TODO @roderm
+		g.Printf("_%s := fromIntSlice(%s, false)\n", a.Name, a.Name)
 	case objc.Bool:
 		g.Printf("_%s := %s(0)\n", a.Name, g.cgoType(a.Type))
 		g.Printf("if %s {\n", a.Name)
@@ -503,6 +507,8 @@ func (g *ObjcWrapper) genRead(to, from string, t *objc.Type) {
 		g.Printf("%s := decodeString(%s)\n", to, from)
 	case objc.Data:
 		g.Printf("%s := toSlice(%s, true)\n", to, from)
+	case objc.IntArray: // TODO @roderm
+		g.Printf("%s := toIntSlice(%s, true)\n", to, from)
 	case objc.Protocol, objc.Class:
 		var proxyName string
 		if n := g.lookupImported(t); n != nil {
@@ -677,7 +683,7 @@ func (g *ObjcWrapper) cType(t *objc.Type) string {
 		return "nstring"
 	case objc.Data:
 		return "nbyteslice"
-	case objc.IntArray:
+	case objc.IntArray: // TODO @roderm
 		return "nintslice"
 	case objc.Int:
 		return "long"
@@ -728,6 +734,8 @@ func (g *ObjcWrapper) goType(t *objc.Type, local bool) string {
 		return "string"
 	case objc.Data:
 		return "[]byte"
+	case objc.IntArray: // TODO @roderm
+		return "[]int32"
 	case objc.Int:
 		return "int"
 	case objc.Uint:

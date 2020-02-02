@@ -695,6 +695,8 @@ func (g *ObjcGen) genWrite(varName string, t types.Type, mode varMode) {
 				g.Printf("nbyteslice _%s = go_seq_from_objc_bytearray(%s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
 			case types.Int32: // Int32.
 				g.Printf("nintslice _%s = go_seq_from_objc_intarray(%s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
+			// case ???:
+			// TODO @roderm
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
@@ -762,6 +764,10 @@ func (g *ObjcGen) genRead(toName, fromName string, t types.Type, mode varMode) {
 			switch e.Kind() {
 			case types.Uint8: // Byte.
 				g.Printf("NSData *%s = go_seq_to_objc_bytearray(%s, %d);\n", toName, fromName, toCFlag(mode == modeRetained))
+			//case types.Int32: // Int.
+			//	g.Printf("??? *%s = go_seq_to_objc_bytearray(%s, %d);\n", toName, fromName, toCFlag(mode == modeRetained))
+			// case ???:
+			// TODO @roderm
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
@@ -1344,10 +1350,16 @@ func (g *ObjcGen) objcType(typ types.Type) string {
 			return "TODO"
 		}
 	case *types.Slice:
-		elem := g.objcType(typ.Elem())
-		// Special case: NSData seems to be a better option for byte slice.
-		if elem == "byte" {
-			return "NSData* _Nullable"
+		switch e := typ.Elem().(type) {
+		case *types.Basic:
+			switch e.Kind() {
+			case types.Uint8:
+				// Special case: NSData seems to be a better option for byte slice.
+				return "NSData* _Nullable"
+			case types.Int32:
+				return "NSArray* _Nullable"
+				// TODO @roderm
+			}
 		}
 		// TODO(hyangah): support other slice types: NSArray or CFArrayRef.
 		// Investigate the performance implication.
