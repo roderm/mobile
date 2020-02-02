@@ -93,6 +93,21 @@ jbyteArray go_seq_to_java_bytearray(JNIEnv *env, nbyteslice s, int copy) {
 	return res;
 }
 
+jintArray go_seq_to_java_intarray(JNIEnv *env, nintslice s, int copy) {
+	if (s.ptr == NULL) {
+		return NULL;
+	}
+	jintArray res = (*env)->NewIntArray(env, s.len);
+	if (res == NULL) {
+		LOG_FATAL("NewIntArray failed");
+	}
+	(*env)->SetIntArrayRegion(env, res, 0, s.len, s.ptr);
+	if (copy) {
+		free(s.ptr);
+	}
+	return res;
+}
+
 #define surr1 0xd800
 #define surr2 0xdc00
 #define surr3 0xe000
@@ -218,6 +233,34 @@ nbyteslice go_seq_from_java_bytearray(JNIEnv *env, jbyteArray arr, int copy) {
 		memcpy(ptr_copy, ptr, len);
 		(*env)->ReleaseByteArrayElements(env, arr, ptr, JNI_ABORT);
 		ptr = (jbyte *)ptr_copy;
+	}
+	res.ptr = ptr;
+	res.len = len;
+	return res;
+}
+
+nintslice go_seq_from_java_intarray(JNIEnv *env, jintArray arr, int copy) {
+	struct nintslice res = {NULL, 0};
+	if (arr == NULL) {
+		return res;
+	}
+
+	jsize len = (*env)->GetArrayLength(env, arr);
+	if (len == 0) {
+		return res;
+	}
+	jint *ptr = (*env)->GetIntArrayElements(env, arr, NULL);
+	if (ptr == NULL) {
+		LOG_FATAL("GetIntArrayElements failed");
+	}
+	if (copy) {
+		void *ptr_copy = (void *)malloc(len);
+		if (ptr_copy == NULL) {
+			LOG_FATAL("malloc failed");
+		}
+		memcpy(ptr_copy, ptr, len);
+		(*env)->ReleaseIntArrayElements(env, arr, ptr, JNI_ABORT);
+		ptr = (jint *)ptr_copy;
 	}
 	res.ptr = ptr;
 	res.len = len;

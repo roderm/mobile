@@ -96,6 +96,7 @@ const (
 	Class
 	String
 	Data
+	IntArray
 	Int
 	Uint
 	Short

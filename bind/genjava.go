@@ -912,6 +912,8 @@ func (g *JavaGen) genJavaToC(varName string, t types.Type, mode varMode) {
 			switch e.Kind() {
 			case types.Uint8: // Byte.
 				g.Printf("nbyteslice _%s = go_seq_from_java_bytearray(env, %s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
+			case types.Int32:
+				g.Printf("nintslice _%s = go_seq_from_java_intarray(env, %s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
@@ -949,6 +951,8 @@ func (g *JavaGen) genCToJava(toName, fromName string, t types.Type, mode varMode
 			switch e.Kind() {
 			case types.Uint8: // Byte.
 				g.Printf("jbyteArray %s = go_seq_to_java_bytearray(env, %s, %d);\n", toName, fromName, toCFlag(mode == modeRetained))
+			case types.Int32: // Byte.
+				g.Printf("jintArray %s = go_seq_to_java_intarray(env, %s, %d);\n", toName, fromName, toCFlag(mode == modeRetained))
 			default:
 				g.errorf("unsupported type: %s", t)
 			}

@@ -237,7 +237,7 @@ func (g *ObjcWrapper) GenH() {
 			g.Printf("#import %q\n", n+".objc.h")
 		}
 	}
-	for _, tn := range []string{"int", "nstring", "nbyteslice", "long", "unsigned long", "short", "unsigned short", "bool", "char", "unsigned char", "float", "double"} {
+	for _, tn := range []string{"int", "nstring", "nbyteslice", "nintslice", "long", "unsigned long", "short", "unsigned short", "bool", "char", "unsigned char", "float", "double"} {
 		sn := strings.Replace(tn, " ", "_", -1)
 		g.Printf("typedef struct ret_%s {\n", sn)
 		g.Printf("	%s res;\n", tn)
@@ -459,6 +459,8 @@ func (g *ObjcWrapper) genObjCToC(name string, t *objc.Type, mode varMode) {
 		g.Printf("nstring _%s = go_seq_from_objc_string(%s);\n", name, name)
 	case objc.Data:
 		g.Printf("nbyteslice _%s = go_seq_from_objc_bytearray(%s, %d);\n", name, name, toCFlag(mode == modeRetained))
+	case objc.IntArray:
+		g.Printf("nintslice _%s = go_seq_from_objc_intarray(%s, %d);\n", name, name, toCFlag(mode == modeRetained))
 	case objc.Bool, objc.Int, objc.Uint, objc.Short, objc.Ushort, objc.Char, objc.Uchar, objc.Float, objc.Double:
 		g.Printf("%s _%s = (%s)%s;\n", g.cType(t), name, g.cType(t), name)
 	case objc.Protocol, objc.Class:
@@ -675,6 +677,8 @@ func (g *ObjcWrapper) cType(t *objc.Type) string {
 		return "nstring"
 	case objc.Data:
 		return "nbyteslice"
+	case objc.IntArray:
+		return "nintslice"
 	case objc.Int:
 		return "long"
 	case objc.Uint:

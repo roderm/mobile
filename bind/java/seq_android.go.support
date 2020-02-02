@@ -80,6 +80,27 @@ func fromSlice(s []byte, cpy bool) C.nbyteslice {
 	return C.nbyteslice{ptr: unsafe.Pointer(ptr), len: n}
 }
 
+// fromSlice converts a slice to a jbyteArray cast as a nintslice. If cpy
+// is set, the returned slice is a copy to be free by go_seq_to_java_bytearray.
+func fromIntSlice(s []int32, cpy bool) C.nintslice {
+	if s == nil || len(s) == 0 {
+		return C.nintslice{}
+	}
+	var ptr *C.jint
+	n := C.jsize(len(s))
+	if cpy {
+		ptr = (*C.jint)(C.malloc(C.size_t(n)))
+		if ptr == nil {
+			panic("fromIntSlice: malloc failed")
+		}
+		target := (*[1<<21 - 1]int32)(unsafe.Pointer(ptr))
+		copy(target[:n], s)
+	} else {
+		ptr = (*C.jint)(unsafe.Pointer(&s[0]))
+	}
+	return C.nintslice{ptr: unsafe.Pointer(ptr), len: n}
+}
+
 // toSlice takes a nbyteslice (jbyteArray) and returns a byte slice
 // with the data. If cpy is set, the slice contains a copy of the data and is
 // freed.
@@ -95,4 +116,14 @@ func toSlice(s C.nbyteslice, cpy bool) []byte {
 		b = (*[1<<31 - 1]byte)(unsafe.Pointer(s.ptr))[:s.len:s.len]
 	}
 	return b
+}
+// toSlice takes a nintslice (jintArray) and returns a int slice
+// with the data. If cpy is set, the slice contains a copy of the data and is
+// freed.
+func toIntSlice(s C.nintslice, cpy bool) []int32 {
+	if s.ptr == nil || s.len == 0 {
+		return nil
+	}
+	
+	return (*[1<<21 - 1]int32)(unsafe.Pointer(s.ptr))[:s.len:s.len]
 }

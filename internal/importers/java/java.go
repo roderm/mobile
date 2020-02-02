@@ -537,10 +537,14 @@ func (t *Type) CType() string {
 	case String:
 		return "nstring"
 	case Array:
-		if t.Elem.Kind != Byte {
+		switch t.Elem.Kind {
+		case Byte:
+			return "nbyteslice"
+		case Int:
+			return "nintslice"
+		default:
 			panic("unsupported array type")
 		}
-		return "nbyteslice"
 	case Object:
 		return "jint"
 	default:

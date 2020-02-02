@@ -136,6 +136,14 @@ NSData *go_seq_to_objc_bytearray(nbyteslice s, int copy) {
   return [NSData dataWithBytesNoCopy:s.ptr length:s.len freeWhenDone:freeWhenDone];
 }
 
+// NSData *go_seq_to_objc_intarray(nintslice s, int copy) {
+//   if (s.ptr == NULL) {
+//     return NULL;
+//   }
+//   BOOL freeWhenDone = copy ? YES : NO;
+//   return [NSData dataWithBytesNoCopy:s.ptr length:s.len freeWhenDone:freeWhenDone];
+// }
+
 NSString *go_seq_to_objc_string(nstring str) {
   if (str.len == 0) {  // empty string.
     return @"";
@@ -205,6 +213,31 @@ nbyteslice go_seq_from_objc_bytearray(NSData *data, int copy) {
   res.len = sz;
   return res;
 }
+
+// nintslice go_seq_from_objc_intarray(NS??? *data, int copy) {
+//   struct nintslice res = {NULL, 0};
+//   int sz = data.length;
+//   if (sz == 0) {
+//     return res;
+//   }
+//   void *ptr;
+//   // If the argument was not a NSMutableData, copy the data so that
+//   // the NSData is not changed from Go. The corresponding free is called
+//   // by releaseByteSlice.
+//   if (copy || ![data isKindOfClass:[NSMutableData class]]) {
+//     void *arr_copy = malloc(sz);
+//     if (arr_copy == NULL) {
+//       LOG_FATAL(@"malloc failed");
+//     }
+//     memcpy(arr_copy, [data bytes], sz);
+//     ptr = arr_copy;
+//   } else {
+//     ptr = (void *)[data bytes];
+//   }
+//   res.ptr = ptr;
+//   res.len = sz;
+//   return res;
+// }
 
 nstring go_seq_from_objc_string(NSString *s) {
   nstring res = {NULL, 0};

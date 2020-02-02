@@ -34,6 +34,11 @@ typedef struct nbyteslice {
 	void *ptr;
 	int len;
 } nbyteslice;
+typedef struct nintslice
+{
+  void *ptr;
+  int len;
+} nintslice;
 typedef int nint;
 
 extern void init_seq();
@@ -55,9 +60,11 @@ extern GoSeqRef *go_seq_from_refnum(int32_t refnum);
 extern id go_seq_objc_from_refnum(int32_t refnum);
 
 extern nbyteslice go_seq_from_objc_bytearray(NSData *data, int copy);
+// extern nintslice go_seq_from_objc_intarray(NS??? *data, int copy);
 extern nstring go_seq_from_objc_string(NSString *s);
 
 extern NSData *go_seq_to_objc_bytearray(nbyteslice, int copy);
+// extern NS??? *go_seq_to_objc_intarray(nintslice, int copy);
 extern NSString *go_seq_to_objc_string(nstring str);
 
 #endif // __GO_SEQ_DARWIN_HDR__

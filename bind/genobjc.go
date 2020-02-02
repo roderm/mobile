@@ -693,6 +693,8 @@ func (g *ObjcGen) genWrite(varName string, t types.Type, mode varMode) {
 			switch e.Kind() {
 			case types.Uint8: // Byte.
 				g.Printf("nbyteslice _%s = go_seq_from_objc_bytearray(%s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
+			case types.Int32: // Int32.
+				g.Printf("nintslice _%s = go_seq_from_objc_intarray(%s, %d);\n", varName, varName, toCFlag(mode == modeRetained))
 			default:
 				g.errorf("unsupported type: %s", t)
 			}

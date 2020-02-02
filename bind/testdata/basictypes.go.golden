@@ -40,6 +40,12 @@ func proxybasictypes__ByteArrays(param_x C.nbyteslice) C.nbyteslice {
 	_res_0 := fromSlice(res_0, true)
 	return _res_0
 }
+func proxybasictypes__IntArrays(param_x C.nintslice) C.nintslice {
+	_param_x := toSlice(param_x, false)
+	res_0 := basictypes.ByteArrays(_param_x)
+	_res_0 := fromSlice(res_0, true)
+	return _res_0
+}
 
 //export proxybasictypes__Error
 func proxybasictypes__Error() C.int32_t {

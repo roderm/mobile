@@ -34,6 +34,16 @@ NSData* _Nullable BasictypesByteArrays(NSData* _Nullable x) {
 	return _ret0_;
 }
 
+// NS???* _Nullable BasictypesIntArrays(NS???* _Nullable x) {
+// 	nintslice _x = go_seq_from_objc_intarray(x, 0);
+// 	nintslice r0 = proxybasictypes__IntArrays(_x);
+// 	if (![x isKindOfClass:[NSMutableData class]]) {
+// 	  free(_x.ptr);
+// 	}
+// 	NS??? *_ret0_ = go_seq_to_objc_intarray(r0, 1);
+// 	return _ret0_;
+// }
+
 BOOL BasictypesError(NSError* _Nullable* _Nullable error) {
 	int32_t r0 = proxybasictypes__Error();
 	Universeerror* _error = nil;

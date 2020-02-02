@@ -240,7 +240,7 @@ func (g *ClassGen) GenGo() {
 
 func (g *ClassGen) GenH() {
 	g.Printf(classesHHeader)
-	for _, tn := range []string{"jint", "jboolean", "jshort", "jchar", "jbyte", "jlong", "jfloat", "jdouble", "nstring", "nbyteslice"} {
+	for _, tn := range []string{"jint", "jboolean", "jshort", "jchar", "jbyte", "jlong", "jfloat", "jdouble", "nstring", "nbyteslice", "nintslice"} {
 		g.Printf("typedef struct ret_%s {\n", tn)
 		g.Printf("	%s res;\n", tn)
 		g.Printf("	jint exc;\n")
@@ -838,10 +838,14 @@ func (g *ClassGen) genJavaToC(v string, t *java.Type) {
 	case java.String:
 		g.Printf("nstring _%s = go_seq_from_java_string(env, %s);\n", v, v)
 	case java.Array:
-		if t.Elem.Kind != java.Byte {
+		switch t.Elem.Kind {
+		case java.Byte:
+			g.Printf("nbyteslice _%s = go_seq_from_java_bytearray(env, %s, 1);\n", v, v)
+		case java.Int:
+			g.Printf("nintslice _%s = go_seq_from_java_intarray(env, %s, 1);\n", v, v)
+		default:
 			panic("unsupported array type")
 		}
-		g.Printf("nbyteslice _%s = go_seq_from_java_bytearray(env, %s, 1);\n", v, v)
 	case java.Object:
 		g.Printf("jint _%s = go_seq_to_refnum(env, %s);\n", v, v)
 	default:
