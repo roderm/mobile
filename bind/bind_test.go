@@ -36,6 +36,7 @@ var tests = []string{
 	"", // The universe package with the error type.
 	"testdata/basictypes.go",
 	"testdata/structs.go",
+	"testdata/slices.go",
 	"testdata/interfaces.go",
 	"testdata/issue10788.go",
 	"testdata/issue12328.go",
@@ -447,10 +448,12 @@ func TestGenGoObjcWrappers(t *testing.T) {
 		refs := fileRefs(t, filename, "ObjC/")
 		types, err := objc.Import(refs)
 		if err != nil {
+			t.Logf("Failed on Import of %s \n", filename)
 			t.Fatal(err)
 		}
 		tmpGopath, err := ioutil.TempDir(os.TempDir(), "gomobile-bind-test-")
 		if err != nil {
+			t.Logf("Failed on Path of %s \n", tmpGopath)
 			t.Fatal(err)
 		}
 		defer os.RemoveAll(tmpGopath)

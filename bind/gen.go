@@ -517,7 +517,6 @@ func (g *Generator) isSupported(t types.Type) bool {
 			case types.Uint8,
 				types.Int32:
 				return true
-
 			}
 			return false
 		}
