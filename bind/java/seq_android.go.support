@@ -127,3 +127,37 @@ func toIntSlice(s C.nintslice, cpy bool) []int32 {
 	
 	return (*[1<<21 - 1]int32)(unsafe.Pointer(s.ptr))[:s.len:s.len]
 }
+
+func fromPtrSlice(s []interface, cpy bool) C.nptrslice {
+	if s == nil || len(s) == 0 {
+		return C.nptrslice{}
+	}
+	var ptr *C.jint
+	n := C.jsize(len(s))
+	if cpy {
+		ptr = (*C.jint)(C.malloc(C.size_t(n)))
+		if ptr == nil {
+			panic("fromIntSlice: malloc failed")
+		}
+		target := (*[1<<21 - 1]int32)(unsafe.Pointer(ptr))
+		copy(target[:n], s)
+	} else {
+		ptr = (*C.jint)(unsafe.Pointer(&s[0]))
+	}
+	return C.nptrslice{ptr: unsafe.Pointer(ptr), len: n}
+}
+
+func toPtrSlice(s C.nptrslice, /*type reflect.Type, */ cpy bool) []interface {
+	if s.ptr == nil || s.len == 0 {
+		return nil
+	}
+	var b []interface
+	var refs[]int32
+
+	refs = (*[1<<31 - 1]int32)(unsafe.Pointer(s.ptr))[:s.len:s.len]
+	for _, r := range refs {
+		// TODO: type conversion needed?
+		b = append(b, (unsafe.Pointer(r)))
+	}
+	return b
+}

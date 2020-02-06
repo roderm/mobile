@@ -123,6 +123,13 @@ func (g *goGen) genWrite(toVar, fromVar string, t types.Type, mode varMode) {
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
+		case *types.Pointer:
+			switch e.Elem().(type) {
+			case *types.Named:
+				g.Printf("%s := fromPtrSlice(%s, %v)\n", toVar, fromVar, mode == modeRetained)
+			default:
+				g.errorf("unsupported type: %s", t)
+			}
 		default:
 			g.errorf("unsupported type: %s", t)
 		}
@@ -411,6 +418,8 @@ func (g *goGen) genRead(toVar, fromVar string, typ types.Type, mode varMode) {
 			default:
 				g.errorf("unsupported type: %s", t)
 			}
+		case *types.Pointer:
+			g.Printf("%s := toPtrSlice(%s, %v)\n", toVar, fromVar, mode == modeRetained)
 		default:
 			g.errorf("unsupported type: %s", t)
 		}
