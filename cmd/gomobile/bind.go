@@ -235,6 +235,7 @@ func getModuleVersions(targetOS string, targetArch string, src string) (*modfile
 	if targetOS == "darwin" {
 		tags = append(tags, "ios")
 	}
+	// TODO(hyangah): probably we don't need to add all the dependencies.
 	cmd.Args = append(cmd.Args, "-m", "-json", "-tags="+strings.Join(tags, ","), "all")
 	cmd.Dir = src
 
@@ -245,6 +246,7 @@ func getModuleVersions(targetOS string, targetArch string, src string) (*modfile
 	}
 
 	type Module struct {
+		Main    bool
 		Path    string
 		Version string
 		Dir     string
@@ -261,14 +263,20 @@ func getModuleVersions(targetOS string, targetArch string, src string) (*modfile
 			return nil, err
 		}
 		if mod != nil {
-			switch {
-			case mod.Replace != nil:
-				f.AddReplace(mod.Path, mod.Version, mod.Replace.Dir, mod.Replace.Version)
-			case mod.Version == "":
+			if mod.Replace != nil {
+				p, v := mod.Replace.Path, mod.Replace.Version
+				if modfile.IsDirectoryPath(p) {
+					// replaced by a local directory
+					p = mod.Replace.Dir
+				}
+				f.AddReplace(mod.Path, mod.Version, p, v)
+			} else {
 				// When the version part is empty, the module is local and mod.Dir represents the location.
-				f.AddReplace(mod.Path, "", mod.Dir, "")
-			default:
-				f.AddRequire(mod.Path, mod.Version)
+				if v := mod.Version; v == "" {
+					f.AddReplace(mod.Path, mod.Version, mod.Dir, "")
+				} else {
+					f.AddRequire(mod.Path, v)
+				}
 			}
 		}
 		if err == io.EOF {
